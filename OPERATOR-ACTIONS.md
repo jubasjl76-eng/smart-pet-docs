@@ -310,19 +310,20 @@ setup + the host are yours.
 
 ### G4 ☐ Wokwi CI token (Phase 17 firmware slice)
 
-**Why:** the GoogleTest host suite + ASan/UBSan are in CI already
-([sdk#9](https://github.com/jubasjl76-eng/smart-pet-device-sdk/pull/9)). The
-next firmware-test slice is a **Wokwi** simulation that boots the feeder
-sketch, sends a `feed` command over MQTT and asserts the ack — that needs a
-Wokwi CLI token.
+**Why:** the GoogleTest host suite + ASan/UBSan + `src/` coverage are in CI
+already. The `.wokwi/` feeder board + boot scenario and the gated `wokwi` job
+in `smart-pet-ci/pio-ci.yml` are also **already in place**
+([sdk#10](https://github.com/jubasjl76-eng/smart-pet-device-sdk/pull/10),
+[ci#17](https://github.com/jubasjl76-eng/smart-pet-ci/pull/17)) — the job
+builds the feeder image and boots it on a simulated ESP32, asserting the
+SDK's Wi-Fi-provisioning serial line. It stays a no-op on every run until the
+token exists.
 
 **How:** sign in at <https://wokwi.com>, then <https://wokwi.com/dashboard/ci>
 → "Request a CI token" (free for open-source repos). Add it as an **org-level
-GitHub Actions secret** `WOKWI_CLI_TOKEN`.
-
-**Then Claude:** adds a `.wokwi/` scenario + a `wokwi-cli` step to
-`smart-pet-ci/pio-ci.yml` (guarded on the token being present, so it's a
-no-op until you add it).
+GitHub Actions secret** `WOKWI_CLI_TOKEN`. Nothing else to do — the job
+picks it up on the next run. (Optional later: extend `.wokwi/scenario.yaml`
+to a full MQTT `feed` command → ack round trip.)
 
 ---
 
