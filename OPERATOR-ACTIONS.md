@@ -276,6 +276,25 @@ adds the workflow per repo — say which you prefer).
 An email (e.g. `security@yourdomain`) for `SECURITY.md`. Decision + the
 address.
 
+### F4 ☐ `SECURITY_REPORT_TOKEN` — weekly security report
+
+**Why:** `smart-pet-ci/.github/workflows/security-report.yml` rolls every
+repo's code-scanning / Dependabot / secret-scanning alerts into one weekly
+Markdown report committed to `smart-pet-docs/security/YYYY-Www.md`. A
+workflow's built-in `GITHUB_TOKEN` can only see its own repo, so this needs a
+cross-repo token. Until it is set the job logs a warning and does nothing.
+
+**How:** create a **fine-grained PAT** (Settings → Developer settings →
+Fine-grained tokens) scoped to all Smart Pet repos with **Code scanning
+alerts: read**, **Dependabot alerts: read**, **Secret scanning alerts: read**,
+and **Contents: read/write** on `smart-pet-docs`. Add it as an **org (or
+`smart-pet-ci` repo) Actions secret** named `SECURITY_REPORT_TOKEN`. A classic
+PAT with `repo` + `security_events` also works but is broader than needed.
+
+**Then Claude:** nothing — the Monday 08:00 UTC run picks it up. Trigger a
+first run manually (Actions → security-report → Run workflow) to seed the
+delta baseline.
+
 ---
 
 ## G · Firmware hardening (Phase 19) — hardware & keys
