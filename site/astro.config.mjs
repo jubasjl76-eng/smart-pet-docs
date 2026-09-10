@@ -18,6 +18,7 @@ export default defineConfig({
           items: [
             { label: 'Introduction', slug: 'index' },
             { label: 'Build progress', slug: 'progress' },
+            { label: 'Operator actions', slug: 'operator-actions' },
           ],
         },
         {
