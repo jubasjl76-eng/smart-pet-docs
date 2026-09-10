@@ -1,0 +1,36 @@
+---
+title: Smart Pet — Engineering Docs
+description: Architecture, ADRs, environment + repo model, and the API / MQTT contracts.
+template: splash
+hero:
+  tagline: The engineering reference for the Smart Pet platform — how the repos fit together, how environments are wired, and the contracts every client speaks.
+  actions:
+    - text: Repository model
+      link: /smart-pet-docs/repositories/
+      icon: right-arrow
+    - text: HTTP API reference
+      link: /smart-pet-docs/reference/api/
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Architecture" icon="puzzle">
+    The [repository model](/smart-pet-docs/repositories/) (polyrepo + git-tag contract
+    packages, [ADR-0001](/smart-pet-docs/adr/0001-polyrepo-with-contract-packages/)) and the
+    four-tier [environment strategy](/smart-pet-docs/environments/).
+  </Card>
+  <Card title="Decisions" icon="approve-check">
+    Architecture Decision Records — the "why" behind the structural choices,
+    kept short and dated.
+  </Card>
+  <Card title="Contracts" icon="document">
+    The [HTTP API](/smart-pet-docs/reference/api/) (OpenAPI 3, generated from zod) and
+    the [MQTT protocol](/smart-pet-docs/reference/mqtt/) (AsyncAPI 3.1).
+  </Card>
+  <Card title="Progress" icon="rocket">
+    The [hardening track](/smart-pet-docs/hardening-plan/) (Phases 11–21) and the
+    live [build progress](/smart-pet-docs/progress/) table.
+  </Card>
+</CardGrid>

@@ -1,0 +1,6 @@
+node_modules/
+graphify-out/
+.DS_Store
+site/dist/
+site/.astro/
+site/src/content/docs/
