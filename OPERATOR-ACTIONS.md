@@ -25,9 +25,10 @@ Status key: ☐ not started · ◐ partly done · ☑ done
 
 ### A1 ☐ Sentry — account + one project per app
 
-**Why:** every Node service already imports `src/instrument.ts`; it's a no-op
-until a DSN is set. The UI-repo work (dashboard / website / app) is next and
-needs the same.
+**Why:** the SDK is already wired into **all 4 Node services + the dashboard +
+the app** (`src/instrument.ts`, no-op until a DSN is set). The website slice
+is written but not merged (see A3). All of it stays dormant until you create
+the org + DSNs.
 
 **How:**
 1. Create a Sentry org (SaaS free tier is fine): <https://sentry.io/signup/>.
@@ -35,20 +36,35 @@ needs the same.
    - `smart-pet-backend` (Node) · `pet-iot-edge-gateway` (Node) ·
      `pet-iot-sensors-service` (Node) · `pet-iot-camera-service` (Node)
    - `backoffice-dashboard` (React) · `smart-pet-website` (Next.js) ·
-     `smart-pet-app` (React Native) *(create when the app is de-deferred)*
+     `smart-pet-app` (React Native)
    - `smart-pet-firmware` (Native / other) *(Phase 19)*
 3. Copy each project's **DSN** (Settings → Client Keys).
-4. Put the DSN where each app reads env:
+4. Put the DSN where each app reads env (var names are in each repo's
+   `.env.example`):
    - **Node services (dev, local):** `SENTRY_DSN=` in each repo's `.env`
-   - **Node services (staging/prod):** as a GitHub **Environment** secret
-     `SENTRY_DSN` on each repo (`dev` / `staging` / `prod`), plus
+   - **Node services (staging/prod):** a GitHub **Environment** secret
+     `SENTRY_DSN` per repo per tier (`dev` / `staging` / `prod`), plus
      `SENTRY_ENVIRONMENT` = the tier name
-   - **dashboard:** Vercel/nginx env `VITE_SENTRY_DSN` (build-time)
-   - **website:** Vercel env `NEXT_PUBLIC_SENTRY_DSN` + `SENTRY_DSN`
-   - **app:** EAS secret `SENTRY_DSN`
+   - **dashboard:** build env `VITE_SENTRY_DSN`
+   - **website:** Vercel env `NEXT_PUBLIC_SENTRY_DSN` (+ `SENTRY_DSN` server-side)
+   - **app:** `.env` / EAS secret `EXPO_PUBLIC_SENTRY_DSN`
 
-**Then Claude:** flips nothing — the SDKs pick the DSN up from env on next
-deploy. Confirms events land with a one-off test error.
+**Then Claude:** flips nothing — the SDKs pick the DSN up on the next deploy.
+Confirms events land with a one-off test error.
+
+### A3 ◐ Website Sentry — blocked on Cursor's working tree
+
+The `@sentry/nextjs` wiring for `smart-pet-website` is written and verified
+(`sentry.{server,edge}.config.ts`, `src/instrumentation*.ts`,
+`global-error.tsx`, `withSentryConfig` in `next.config.ts`) but **not
+committed** — the repo's working tree had uncommitted Cursor product work when
+Claude got there (the `<Button>` → plain `<a>` refactor in `error.tsx` /
+`not-found.tsx` / litters pages). Per the two-agents-one-tree rule, Claude
+backed its changes out rather than bundle them.
+
+**You:** have Cursor commit or shelve that work, then tell Claude — it re-applies
+the Sentry slice on a clean branch (patch saved). Or say "go" and Claude will
+land it alongside, accepting the merge with Cursor's next push.
 
 ### A2 ☐ Sentry — CI release + source-map upload (Phase 15 tail)
 
@@ -161,20 +177,21 @@ adopt Cloudflare (see H1) DNS lives there instead of Route53.
 The repo is currently **deferred** and Cursor-owned for product work. When you
 decide to build it out, these come first.
 
-### C1 ☐ Expo / EAS project
+### C1 ☑ Expo / EAS project
 
-**How:**
-```bash
-cd smart-pet-app
-npx expo login                 # or: eas login   (needs an Expo account)
-eas init                       # creates the EAS project, writes the projectId to app.json
-```
-Give Claude the `projectId` (or just push `app.json`).
+Done — `app.json` already carries `extra.eas.projectId`
+(`6af745ed-…`, owner `marcofolgado76`) and `eas.json` has
+`development` / `preview` / `production` profiles.
 
 ### C2 ☐ EAS secrets / env
 
-`SENTRY_DSN`, `EXPO_PUBLIC_API_BASE_URL` per profile, and any provider keys —
-`eas secret:create` or the Expo dashboard.
+`EXPO_PUBLIC_SENTRY_DSN`, `EXPO_PUBLIC_API_BASE_URL` per profile, and any
+provider keys — `eas secret:create` or the Expo dashboard. For Sentry
+source-map upload also add `SENTRY_AUTH_TOKEN` (+ `SENTRY_ORG`,
+`SENTRY_PROJECT`) as EAS secrets.
+
+Also: `smart-pet-app`'s `build.yml` CI needs an `EXPO_TOKEN` repo secret to run
+`eas build` (already referenced by the workflow).
 
 ### C3 ☐ Store accounts (only for store builds / submissions)
 
