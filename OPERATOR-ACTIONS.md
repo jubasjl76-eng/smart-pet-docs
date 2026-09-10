@@ -57,18 +57,33 @@ Cursor committed its refactor (`7baa1fd`); Claude re-applied the
 `@sentry/nextjs` slice on a clean branch and merged it
 ([website #9](https://github.com/jubasjl76-eng/smart-pet-website/pull/9)).
 
-### A2 ☐ Sentry — CI release + source-map upload (Phase 15 tail)
+### A2 ◐ Sentry — CI release + source-map upload
 
-**Why:** to get readable stack traces (un-minified) and per-release
-regression tracking on `v*` tags.
+**Why:** per-release regression tracking, and readable (un-minified) stack
+traces.
 
-**How:** create an **org-level GitHub Actions secret** (not per-repo):
-- `SENTRY_AUTH_TOKEN` — Sentry → Settings → Auth Tokens, scopes
-  `project:releases` + `org:read`
-- `SENTRY_ORG` — your org slug
+**Already wired (dormant until the secret exists):**
+- `smart-pet-ci/deploy-ecs.yml` — when `sentry-project` is passed (it is, for
+  `smart-pet-backend` + `pet-iot-sensors-service`), each deploy stamps
+  `SENTRY_RELEASE=<project>@<sha12>` on the ECS task and runs
+  `getsentry/action-release` (create + finalize + `set_commits: auto`, tagged
+  with the tier).
+- **dashboard** — `@sentry/vite-plugin` uploads source maps when
+  `SENTRY_AUTH_TOKEN` is in the build env.
+- **website** — `withSentryConfig` does the same on `next build`.
+- **app** — the `@sentry/react-native/expo` plugin does it on `eas build`.
 
-**Then Claude:** adds a `sentry-cli releases` step to `smart-pet-ci`'s
-release / `deploy-ecs` workflows and the Vite/Next/EAS build configs.
+**You still need to:**
+1. Create an **org-level GitHub Actions secret**:
+   - `SENTRY_AUTH_TOKEN` — Sentry → Settings → Auth Tokens, scopes
+     `project:releases` + `org:read` (+ `project:write` for source maps)
+   - `SENTRY_ORG` — your org slug
+2. Put `SENTRY_AUTH_TOKEN` / `SENTRY_ORG` / `SENTRY_PROJECT` into the
+   **dashboard** and **website** build env (Vercel / the dashboard image
+   build), and as **EAS secrets** for the app.
+
+**Then Claude:** (optional) add Node source-map upload — needs `dist/` built
+on the CI runner, not just inside the image.
 
 ---
 
