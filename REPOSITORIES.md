@@ -45,6 +45,7 @@ semver range; Renovate raises the bump PRs.
 | `smart-pet-terraform` | AWS infra (module + `envs/{dev,staging,prod}`) | Claude | merge `main` → `tf apply` dev; staging/prod gated |
 | `smart-pet-simulator` | Virtual kennel / QA harness + web control panel | Claude | `v*` tag; a first-class local-dev + CI test dependency |
 | `smart-pet-dev` | One-command local dev: `Taskfile` + `compose.yaml` for the whole stack | Claude | none (dev tooling); cloned next to the product repos |
+| `smart-pet-docs` | These docs + a Starlight site (`site/`) → GitHub Pages | Claude | push to `main` → Pages deploy (`jubasjl76-eng.github.io/smart-pet-docs`) |
 | `smart-feeder` · `smart-water-dispenser` · `gps-dog-collar` | Device firmware (on the SDK) | Claude | `v*` tag → signed `.bin` + staged fleet rollout |
 | `smart-pet-app` | Owner mobile app (Expo / RN) — **deferred** | Cursor | EAS Build / EAS Update when de-deferred |
 
