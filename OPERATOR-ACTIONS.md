@@ -344,6 +344,16 @@ GitHub Actions secret** `WOKWI_CLI_TOKEN`. Nothing else to do — the job
 picks it up on the next run. (Optional later: extend `.wokwi/scenario.yaml`
 to a full MQTT `feed` command → ack round trip.)
 
+### G5 ☐ Broker ACL for the fleet kill switch
+
+**Why:** Phase 19 added a retained **`kennel/{k}/_control`** topic every device
+in a kennel subscribes to (the "halt fleet" safe-mode switch). It sits *outside*
+a device's normal `kennel/{k}/{type}/{deviceId}/#` subtree.
+
+**How:** in the prod EMQX/Mosquitto ACL, grant each device **subscribe (read)**
+on `kennel/{k}/_control` — publish stays backend-only. Local dev (open ACL)
+already works.
+
 ---
 
 ## H · Traffic control & HA (Phases 20–21)
