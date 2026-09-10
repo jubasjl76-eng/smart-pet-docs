@@ -308,6 +308,22 @@ provisioning scripts + the CI gates; the decision and the jig are yours.
 wired to it, on your network, running the HIL runner Claude builds. Physical
 setup + the host are yours.
 
+### G4 ☐ Wokwi CI token (Phase 17 firmware slice)
+
+**Why:** the GoogleTest host suite + ASan/UBSan are in CI already
+([sdk#9](https://github.com/jubasjl76-eng/smart-pet-device-sdk/pull/9)). The
+next firmware-test slice is a **Wokwi** simulation that boots the feeder
+sketch, sends a `feed` command over MQTT and asserts the ack — that needs a
+Wokwi CLI token.
+
+**How:** sign in at <https://wokwi.com>, then <https://wokwi.com/dashboard/ci>
+→ "Request a CI token" (free for open-source repos). Add it as an **org-level
+GitHub Actions secret** `WOKWI_CLI_TOKEN`.
+
+**Then Claude:** adds a `.wokwi/` scenario + a `wokwi-cli` step to
+`smart-pet-ci/pio-ci.yml` (guarded on the token being present, so it's a
+no-op until you add it).
+
 ---
 
 ## H · Traffic control & HA (Phases 20–21)
