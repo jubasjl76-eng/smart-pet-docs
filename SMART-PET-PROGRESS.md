@@ -58,9 +58,9 @@ Full plan: [`SMART-PET-HARDENING-PLAN.md`](SMART-PET-HARDENING-PLAN.md)
 
 **Phase 14 — deferred:** C++ structs/topics for the SDK from `asyncapi.yaml` — low ROI; `spd_topics.h` is mostly hand-written logic, only the device-type list + QoS policy are contract-derived.
 
-**Phase 15 — done:** backend `@sentry/node` — `src/instrument.ts` (first import, no-op without a DSN), `beforeSend` scrub (auth/cookies), `setupExpressErrorHandler`, `src/version.ts`, Sentry vars in the config contract + `.env.example` ([#47](https://github.com/jubasjl76-eng/smart-pet-backend/pull/47)).
+**Phase 15 — done:** `@sentry/node` in **all 4 Node services** — shared `src/instrument.ts` (first import, no-op without a DSN), exported `scrub()` `beforeSend` (auth / `x-api-key` / cookies, unit-tested), `src/version.ts`, Sentry vars in each config contract + `.env.example`. Express services (`backend`, `sensors`, `camera`) use `setupExpressErrorHandler`; `edge-gateway` (raw `http`) uses `Sentry.captureException` in the route dispatcher + start-failure catch. ([backend#47](https://github.com/jubasjl76-eng/smart-pet-backend/pull/47), [gateway#7](https://github.com/jubasjl76-eng/pet-iot-edge-gateway/pull/7), [sensors#9](https://github.com/jubasjl76-eng/pet-iot-sensors-service/pull/9), [camera#9](https://github.com/jubasjl76-eng/pet-iot-camera-service/pull/9))
 
-**Phase 15 — remaining:** `@sentry/node` in edge-gateway / sensors / camera; `@sentry/react` (dashboard), `@sentry/nextjs` (website), `@sentry/react-native` (app); firmware crash path + consumer; CI — create a Sentry release + upload source maps on `v*`. Needs a Sentry org + a DSN per project (ops step).
+**Phase 15 — remaining:** `@sentry/react` (dashboard), `@sentry/nextjs` (website), `@sentry/react-native` (app); firmware crash path + consumer; CI — create a Sentry release + upload source maps on `v*`. Needs a Sentry org + a DSN per project (ops step).
 | 16–21 | 📋 planned |
 
 **Phase 12 — slice 1 done (2026-09-09):** new repo **`smart-pet-shared`** → `@jubasjl76-eng/shared@0.1.0` (published + `shared-v0.1.0` tag, branch-protected). The typed config contract: `loadConfig(schema)` (parse `process.env` against one zod schema; prints every problem + `process.exit(1)`), `redact()`, env coercion helpers. Git-tag consumable like `mqtt-contract`.
