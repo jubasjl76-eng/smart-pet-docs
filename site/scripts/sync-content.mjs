@@ -19,6 +19,7 @@ const ROOT_DOCS = {
   'ENVIRONMENTS.md': { slug: 'environments', title: 'Environment strategy' },
   'SMART-PET-HARDENING-PLAN.md': { slug: 'hardening-plan', title: 'Hardening plan (Phases 11–21)' },
   'SMART-PET-PROGRESS.md': { slug: 'progress', title: 'Build progress' },
+  'OPERATOR-ACTIONS.md': { slug: 'operator-actions', title: 'Operator actions' },
   'SMART-PET-PRODUCT.md': { slug: 'product', title: 'Product overview' },
   'SMART-PET-VISION-AND-IDEAS.md': { slug: 'vision', title: 'Vision & ideas' },
   'PRIVACY-POLICY.md': { slug: 'privacy-policy', title: 'Privacy policy' },
