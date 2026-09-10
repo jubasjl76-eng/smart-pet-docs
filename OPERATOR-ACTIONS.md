@@ -26,9 +26,8 @@ Status key: ☐ not started · ◐ partly done · ☑ done
 ### A1 ☐ Sentry — account + one project per app
 
 **Why:** the SDK is already wired into **all 4 Node services + the dashboard +
-the app** (`src/instrument.ts`, no-op until a DSN is set). The website slice
-is written but not merged (see A3). All of it stays dormant until you create
-the org + DSNs.
+the website + the app** (no-op until a DSN is set). All of it stays dormant
+until you create the org + DSNs.
 
 **How:**
 1. Create a Sentry org (SaaS free tier is fine): <https://sentry.io/signup/>.
@@ -52,19 +51,11 @@ the org + DSNs.
 **Then Claude:** flips nothing — the SDKs pick the DSN up on the next deploy.
 Confirms events land with a one-off test error.
 
-### A3 ◐ Website Sentry — blocked on Cursor's working tree
+### A3 ☑ Website Sentry — landed
 
-The `@sentry/nextjs` wiring for `smart-pet-website` is written and verified
-(`sentry.{server,edge}.config.ts`, `src/instrumentation*.ts`,
-`global-error.tsx`, `withSentryConfig` in `next.config.ts`) but **not
-committed** — the repo's working tree had uncommitted Cursor product work when
-Claude got there (the `<Button>` → plain `<a>` refactor in `error.tsx` /
-`not-found.tsx` / litters pages). Per the two-agents-one-tree rule, Claude
-backed its changes out rather than bundle them.
-
-**You:** have Cursor commit or shelve that work, then tell Claude — it re-applies
-the Sentry slice on a clean branch (patch saved). Or say "go" and Claude will
-land it alongside, accepting the merge with Cursor's next push.
+Cursor committed its refactor (`7baa1fd`); Claude re-applied the
+`@sentry/nextjs` slice on a clean branch and merged it
+([website #9](https://github.com/jubasjl76-eng/smart-pet-website/pull/9)).
 
 ### A2 ☐ Sentry — CI release + source-map upload (Phase 15 tail)
 
