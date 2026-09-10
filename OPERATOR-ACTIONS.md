@@ -230,12 +230,19 @@ secret names".
 
 ### E1 ☐ Grafana Cloud
 
-**Why:** metrics + dashboards-as-code (Terraform) + trace/log correlation.
+**Why:** all 4 services now expose `GET /metrics` (`prom-client`). They need
+something to scrape them + store the series + draw the dashboards.
 
 **How:** a Grafana Cloud account (free tier: 10k series, 50 GB logs). Create a
 stack; generate an **API token** (MetricsPublisher + a Terraform-provider
 token). Give Claude the stack URL + tokens (as GitHub Environment secrets:
 `GRAFANA_URL`, `GRAFANA_TOKEN`, and the Prometheus remote-write creds).
+
+**Then Claude:** adds the Grafana Agent / Alloy scrape config for the ECS
+tasks (or a remote-write sidecar), the `grafana` Terraform provider +
+dashboards-as-code in `smart-pet-terraform`, and (if you want it) sets
+`METRICS_TOKEN` per service so `/metrics` isn't open. If you'd rather scrape
+with self-hosted Prometheus instead of Grafana Cloud, say so.
 
 ### E2 ☐ Alert destination
 
