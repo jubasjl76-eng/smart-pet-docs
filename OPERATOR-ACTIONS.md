@@ -378,6 +378,20 @@ first **restore drill** with Claude.
 OSS `k6` runs in CI / locally for the 10k-device load test. k6 Cloud only if
 you want the hosted result history + higher VU counts.
 
+### H4 ☐ RDS reboot after a `terraform apply` that changes `max_connections`
+
+**Why:** `max_connections` (staging/prod, `smart-pet-terraform`'s `modules/database`,
+Phase 20 pool tuning) is a *static* Postgres parameter — RDS won't apply a
+change until the instance reboots, either at the next maintenance window or
+on demand.
+
+**How:** after an `apply` that changes it (the plan output will show the
+parameter group as modified), reboot when convenient:
+`aws rds reboot-db-instance --db-instance-identifier smart-pet-<env>`. A
+short connection blip during the reboot; the backend's pool reconnects on its
+own. `statement_timeout` (the other new parameter) is dynamic and needs no
+reboot.
+
 ---
 
 ## Quick reference — secrets by home
