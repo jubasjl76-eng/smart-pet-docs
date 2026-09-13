@@ -358,14 +358,30 @@ already works.
 
 ## H · Traffic control & HA (Phases 20–21)
 
-### H1 ☐ Cloudflare account
+### H1 ◐ Cloudflare account — Terraform built, dormant until you set one up
 
-**Why:** edge WAF + rate-limiting (Phase 18/20), CDN + DNS (Phase 21).
+**Why:** edge WAF + rate-limiting (Phase 18/20), proxied DNS + DDoS/bot
+protection in front of the **website only** (Phase 21, A11) — deliberately
+not the API; a second proxy hop in front of the ALB needs its own
+measurement, not a default.
 
-**How:** a Cloudflare account; move the domain's nameservers to it (or use a
-subzone). Create an API token (Zone: DNS edit, Firewall edit). Give Claude
-the token + zone id as GitHub secrets. If you'd rather stay all-AWS, say so —
-Claude falls back to AWS WAF on the ALB (already in the plan) and Route53.
+**Done:** `smart-pet-terraform`'s `envs/cloudflare` — a proxied DNS record,
+edge TLS (`ssl=strict`, TLS 1.2+, always-HTTPS), the Cloudflare Managed +
+OWASP Core WAF rulesets, a per-IP rate limit, and Bot Fight Mode (free
+tier). Gated behind `enable_cloudflare` (default `false`) — nothing applies
+until you provide credentials, and `terraform validate`/`plan` both pass
+today with it off, no token needed.
+
+**Still needed from you:** a Cloudflare account; move the domain's
+nameservers to it (or use a subzone). Create an API token (Zone: DNS edit,
+Firewall edit) → `CLOUDFLARE_API_TOKEN`. Find the zone id in the Cloudflare
+dashboard. Tell Claude the website's actual hosting origin (its Vercel
+deployment's CNAME target, or wherever it's actually served from — this
+isn't tracked in Terraform anywhere yet). Then `terraform apply` in
+`envs/cloudflare` with `enable_cloudflare = true` + those values.
+
+If you'd rather stay all-AWS instead, say so — the fallback is AWS WAF
+(managed rule groups + rate-based rules) directly on the ALB, not yet built.
 
 ### H2 ◐ Cross-region backup — built, needs a `terraform apply` + the first drill
 
