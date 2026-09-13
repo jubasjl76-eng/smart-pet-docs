@@ -367,11 +367,17 @@ subzone). Create an API token (Zone: DNS edit, Firewall edit). Give Claude
 the token + zone id as GitHub secrets. If you'd rather stay all-AWS, say so —
 Claude falls back to AWS WAF on the ALB (already in the plan) and Route53.
 
-### H2 ☐ Cross-region backup
+### H2 ◐ Cross-region backup — built, needs a `terraform apply` + the first drill
 
-Pick a **second AWS region** for RDS snapshot copy + the firmware/S3 backup.
-Decision only; Claude writes the replication + the DR runbook, and you run the
-first **restore drill** with Claude.
+**Done:** `smart-pet-terraform`'s `envs/prod` replicates RDS automated
+backups + the assets bucket (firmware/buyer-photos) to `eu-west-2` (default —
+override `var.dr_region` before applying if you'd rather use a different
+region). `runbooks/dr.md` has the restore procedure + RTO/RPO per data class.
+
+**Still needed from you:** the next `terraform apply` on `envs/prod` actually
+provisions the DR region's resources (new provider, new buckets — review the
+plan output once before applying, same as any other change). After that
+lands, run the first **quarterly restore drill** — see H5.
 
 ### H3 ☐ k6 Cloud (optional)
 
@@ -391,6 +397,16 @@ parameter group as modified), reboot when convenient:
 short connection blip during the reboot; the backend's pool reconnects on its
 own. `statement_timeout` (the other new parameter) is dynamic and needs no
 reboot.
+
+### H5 ☐ Quarterly restore drill (recurring)
+
+**Why:** an untested backup is a hope, not a recovery plan (Phase 21, A12 #19).
+
+**How:** every quarter, follow `runbooks/dr.md` §3 — restore the latest
+replicated backup to a throwaway instance in `eu-west-2`, spot-check it,
+confirm the assets DR bucket has current firmware, tear the throwaway
+instance down, log the result in that file's drill-log table. Ask Claude to
+walk through it with you the first time.
 
 ---
 
