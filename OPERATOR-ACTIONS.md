@@ -402,18 +402,22 @@ you want the hosted result history + higher VU counts.
 
 ### H6 ☐ Load-test credentials (Phase 21, A12 #24)
 
-**Why:** both load tests are built and manual-trigger-only (`workflow_dispatch`
-— they hit real staging infra, not something to run on every push), but need
-credentials only you can provision.
+**Why:** all three load tests are built and manual-trigger-only
+(`workflow_dispatch` — they hit real staging infra, not something to run on
+every push), but need credentials only you can provision.
 
 **How:**
-- `smart-pet-backend` — create a GitHub **Environment** named
-  `staging-load-test` with secrets `LOAD_TEST_EMAIL` / `LOAD_TEST_PASSWORD`: a
-  throwaway breeder-owner account seeded in staging (reuse the existing
+- `smart-pet-backend` **and** `backoffice-dashboard` — create a GitHub
+  **Environment** named `staging-load-test` with secrets `LOAD_TEST_EMAIL` /
+  `LOAD_TEST_PASSWORD` on **both** repos (same throwaway breeder-owner
+  account seeded in staging works for both — reuse the existing
   `SEED_OWNER_EMAIL`/`SEED_OWNER_PASSWORD` seed mechanism, or create one by
-  hand). Without these, `load-test.yml`'s `authenticated_reads` scenario sees
-  401s but `infra_health` still runs. Also set the workflow's `target_url`
-  input (or its default placeholder) to staging's real API URL.
+  hand). Without these, `smart-pet-backend`'s `authenticated_reads` scenario
+  and every dashboard-critical-path group see 401s, but `infra_health` still
+  runs. Also set each workflow's `target_url` input (or its default
+  placeholder) to staging's real API URL — the dashboard one points at the
+  **backend** API too, since it replays the dashboard's own API calls, not
+  a browser session.
 - `smart-pet-simulator` — if staging's MQTT broker requires auth (it does —
   `dev_allow_anonymous = false` there), set repo secrets `MQTT_USERNAME` /
   `MQTT_PASSWORD` for `mqtt-load-test.yml`, and pass staging's real broker
