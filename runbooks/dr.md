@@ -68,7 +68,9 @@ This assumes `eu-west-1` is unreachable/unusable and `eu-west-2` is healthy.
 ## 3. Quarterly restore drill
 
 An untested backup is a hope, not a recovery plan. Every quarter (operator
-task — see `OPERATOR-ACTIONS.md` H6):
+task — see `OPERATOR-ACTIONS.md` H6; convenient to batch with the
+key-rotation drills in `runbooks/key-rotation.md` rather than tracking a
+separate schedule):
 
 1. Restore the **latest** replicated automated backup to a throwaway
    instance in `eu-west-2` (`restore-db-instance-to-point-in-time`, a new

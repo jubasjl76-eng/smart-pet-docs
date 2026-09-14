@@ -443,6 +443,17 @@ confirm the assets DR bucket has current firmware, tear the throwaway
 instance down, log the result in that file's drill-log table. Ask Claude to
 walk through it with you the first time.
 
+### H7 ☐ Key-rotation drills (recurring)
+
+**Why:** an MQTT credential or a firmware signing key that's never actually
+been rotated in practice is a plan, not a capability (Phase 21, A12 #20).
+
+**How:** `runbooks/key-rotation.md` — rotate a test device's MQTT
+credentials and confirm it reconnects; revoke and un-revoke a throwaway
+firmware signing key. Both are pure API calls, no hardware needed.
+Convenient to run alongside the quarterly restore drill (H5) rather than on
+a separate schedule.
+
 ---
 
 ## Quick reference — secrets by home
