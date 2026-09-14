@@ -1,10 +1,8 @@
 # Key rotation drills
 
 **Status:** Live · **Phase 21** deliverable (A12 #20).
-**Scope:** MQTT device credentials, firmware signing-key revocation. `JWT_SECRET`
-rotation to a `kid` keyset (A12 #20's other named item) is a separate, larger
-piece — not done here; it needs a keyset + grace-window design of its own,
-tracked separately.
+**Scope:** MQTT device credentials, firmware signing-key revocation, and
+`JWT_SECRET` rotation to a `kid` keyset with a grace window.
 
 ---
 
@@ -86,8 +84,59 @@ entire drill is backend-API-only.
 
 ---
 
+## 3. `JWT_SECRET` rotation
+
+**When:** the secret is suspected leaked (committed to a repo by accident, a
+departing engineer had prod access, a secrets-manager audit flags it) — or
+just on a routine schedule if you want one; the mechanism costs nothing to
+exercise when nothing's actually wrong.
+
+**What it does:** every access token now carries a `kid` in its JWT header
+— a deterministic hash of the secret that signed it
+(`sha256(secret).slice(0, 8)`, `src/middleware/auth.ts#kidFor`), not an
+operator-assigned id, so there's no separate id to keep in sync with the
+secret itself. Verification looks up the right key by that `kid` instead of
+trying secrets blindly. A token with **no** `kid` (issued before this
+keyset existed) still verifies against the *current* secret — the feature
+itself shipped with zero forced logouts.
+
+**How to rotate:**
+1. Generate a new random secret (`openssl rand -base64 48`, or your secrets
+   manager's own generator).
+2. Set `JWT_SECRET_PREVIOUS` = the **current** value of `JWT_SECRET` (before
+   you change it).
+3. Set `JWT_SECRET` = the new secret.
+4. Deploy both changes together. From that moment: new logins get tokens
+   signed (and `kid`-tagged) with the new secret; anyone already holding a
+   token signed with the old one keeps working until it expires
+   (`ACCESS_TTL`, 12h default) or you close the window early (next step).
+5. **Close the grace window:** once you're confident (12h+ after step 4, or
+   immediately if you need every existing session to die *right now* —
+   e.g. the leak is confirmed, not just suspected), unset
+   `JWT_SECRET_PREVIOUS` and deploy again. Every token signed with the old
+   secret is rejected from that point on — anyone still holding one is
+   logged out and must sign in again.
+
+**What it does NOT do:** revoke a *specific* still-valid token early (there's
+no per-token denylist) — closing the grace window revokes every token from
+the *old* key at once, not one at a time. For "kick this one compromised
+session out right now" without affecting everyone else, that's a different,
+not-yet-built mechanism (a token denylist or a `tokenVersion` bumped per
+user) — not needed for a key-rotation drill, called out here so it isn't
+assumed to already exist.
+
+**Drill:** in staging, note the current `JWT_SECRET`, rotate it following
+the steps above (including setting `JWT_SECRET_PREVIOUS`), confirm an
+already-logged-in session keeps working (its token still has the old
+`kid`) while a *fresh* login gets a token with the *new* `kid` — decode
+both with `jwt.io` or `node -e "console.log(require('jsonwebtoken').decode(token,{complete:true}).header)"`
+and compare. Then close the grace window and confirm the old session's
+next request gets a 401.
+
+---
+
 ## Cadence
 
-Run both drills once after reading this doc for the first time, then
+Run all three drills once after reading this doc for the first time, then
 whenever `runbooks/dr.md`'s quarterly restore drill happens — convenient
-to batch the two together rather than tracking a separate schedule.
+to batch them together rather than tracking a separate schedule.

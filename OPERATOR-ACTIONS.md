@@ -449,14 +449,18 @@ walk through it with you the first time.
 
 ### H7 ☐ Key-rotation drills (recurring)
 
-**Why:** an MQTT credential or a firmware signing key that's never actually
-been rotated in practice is a plan, not a capability (Phase 21, A12 #20).
+**Why:** an MQTT credential, a firmware signing key, or `JWT_SECRET` that's
+never actually been rotated in practice is a plan, not a capability
+(Phase 21, A12 #20).
 
 **How:** `runbooks/key-rotation.md` — rotate a test device's MQTT
 credentials and confirm it reconnects; revoke and un-revoke a throwaway
-firmware signing key. Both are pure API calls, no hardware needed.
-Convenient to run alongside the quarterly restore drill (H5) rather than on
-a separate schedule.
+firmware signing key; rotate `JWT_SECRET` in staging via
+`JWT_SECRET_PREVIOUS` and confirm an existing session survives the grace
+window while a fresh login gets the new key, then close the window and
+confirm the old session is rejected. All three are pure API/env-var
+changes, no hardware needed. Convenient to run alongside the quarterly
+restore drill (H5) rather than on a separate schedule.
 
 ---
 
@@ -468,6 +472,7 @@ a separate schedule.
 | `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` | org-level GitHub Actions secret | A2 |
 | `DEPLOY_ROLE_ARN`, `AWS_REGION` | GitHub Environment secret, per repo per tier | B3 |
 | `JWT_SECRET`, `PG_PASSWORD`, provider keys | AWS Secrets Manager (runtime) | B5 |
+| `JWT_SECRET_PREVIOUS` | AWS Secrets Manager (runtime) — set only during a rotation's grace window, unset once it closes | H7 |
 | `SOPS_AGE_KEY` | org-level GitHub Actions secret; private key file offline | B6 |
 | `GRAFANA_URL`, `GRAFANA_TOKEN`, remote-write creds | GitHub Environment secret | E1 |
 | `CLOUDFLARE_API_TOKEN`, zone id | GitHub secret | H1 |
